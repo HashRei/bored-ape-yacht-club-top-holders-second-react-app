@@ -23,7 +23,7 @@ const query = `
   }
 `;
 
-function imageQuery(nftID) {
+function imageQuery(nftID: String) {
   return gql`
     {
       tokens(where: {tokenID: "${nftID}"}) {
@@ -32,7 +32,7 @@ function imageQuery(nftID) {
   }`;
 }
 
-function getQueryENSFromETHAddress(ethAddress) {
+function getQueryENSFromETHAddress(ethAddress: String) {
   return gql`
     {
       domains(first: 1, where:{owner:"${ethAddress}"}) {
@@ -53,7 +53,7 @@ function App() {
   const [tokens, setTokens] = useState([]);
   const [ensName, setEnsName] = useState("");
   const [ethAddress, setEthAddress] = useState("");
-  const [nftID, setNftID] = useState("");
+  const [nftID, setNftID] = useState("0"); // There shouldn't be a nftID 0 in the collection
   const [nftImage, setNftImage] = useState("");
 
   const nftListLength = 5;
@@ -66,16 +66,18 @@ function App() {
     fetchNftImageData();
   }, [nftID]);
 
-  async function fetchData(ethAddress) {
+  async function fetchData(ethAddress: String) {
     const response = await client.query(query).toPromise();
     setTokens(response.data.tokens);
 
-    if (ethAddress !== undefined) {
+    if (ethAddress.length === 42) {
       const result = await request(
         HTTP_GRAPHQL_ENDPOINT,
         getQueryENSFromETHAddress(ethAddress)
       );
       setEnsName(result.domains[0].name);
+    } else {
+      setEnsName("No ENS");
     }
   }
 
@@ -86,35 +88,39 @@ function App() {
 
   return (
     <div className="App">
+      <p>ENS tracker</p>
       <input
         style={{ width: "400px" }}
         placeholder="Enter address..."
         onChange={(event) => setEthAddress(event.target.value)}
       />
       <p>ENS: {ensName}</p>
+      <p>Image tracker</p>
       <input
+        type="number"
+        min={0}
         style={{ width: "400px" }}
         placeholder="Enter NFT ID..."
-        onChange={(event) => setNftID(event.target.value)}
+        onChange={(event) =>
+          event.target.value !== "" && setNftID(event.target.value)
+        }
       />
-      <p>NFT Image:</p>{" "}
+      <p>NFT image link:</p>{" "}
       <a href={nftImage} target="_blank" rel="noreferrer">
         {nftImage}
       </a>
-      {tokens.map((token: any) => (
-        <div>
-          <>
-            <b>Holder address:</b> {token.owner.id}
-          </>
+      {tokens.map((token: any, index) => (
+        <div key={index}>
+          <b>Holder address:</b> {token.owner.id}
           <div style={{ flex: "right" }}>
             <p>Number of Bored Apes: {token.owner.tokens.length}</p>
-            {token.owner.tokens.map((nfts, index) => (
-              <>{index <= nftListLength - 1 && <p>NFT # {nfts.id}</p>}</>
+            {token.owner.tokens.map((nfts, indexSecond: number) => (
+              <div key={nfts.id}>
+                {indexSecond <= nftListLength - 1 && <p>NFT # {nfts.id}</p>}
+              </div>
             ))}
             {token.owner.tokens.length > nftListLength - 1 && <p>...</p>}
           </div>
-
-          {/* <a href={token.image} target="_blank" rel="noreferrer">IMAGE</a> */}
         </div>
       ))}
     </div>
