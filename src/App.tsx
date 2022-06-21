@@ -91,72 +91,76 @@ function App() {
 
   return (
     <div className="App">
-      <p>Number of Bored ape to list</p>
-      <input
-        type="number"
-        min={0}
-        style={{ width: "400px" }}
-        placeholder="Enter number of listed Apes..."
-        onChange={(event) => setNumberOfTokens(event.target.value)}
-      />
-      <p>ENS tracker</p>
-      <input
-        style={{ width: "400px" }}
-        placeholder="Enter address..."
-        onChange={(event) => setEthAddress(event.target.value)}
-      />
-      <p>ENS: {ensName}</p>
-      <p>Image tracker</p>
-      <input
-        type="number"
-        min={0}
-        style={{ width: "400px" }}
-        placeholder="Enter NFT ID..."
-        onChange={(event) =>
-          event.target.value !== "" && setNftID(event.target.value)
-        }
-      />
-      <p>NFT image link:</p>{" "}
-      <a href={nftImage} target="_blank" rel="noreferrer">
-        {nftImage}
-      </a>
-      {tokens.map((token: any, index) => (
-        <div key={index}>
-          <b>Holder address:</b> {token.owner.id}
-          {console.log("token", token)}
-          <div style={{ flex: "right" }}>
-            <p>Number of Bored Apes: {token.owner.tokens.length}</p>
-            {token.owner.tokens.map((nfts, indexSecond: number) => (
-              <div key={nfts.id}>
-                <>
-                  {() => setNftListLength(minimumNftListLength)}
-                  {indexSecond <= nftListLength - 1 && <p>NFT # {nfts.id}</p>}
-                </>
-              </div>
-            ))}
-            {token.owner.tokens.length > nftListLength - 1 &&
-              nftListLength <= minimumNftListLength && (
-                <button
-                  onClick={() => {
-                    setNftListLength(parseInt(token.owner.tokens.length));
-                  }}
-                >
-                  ...
-                </button>
-              )}
-            {nftListLength > minimumNftListLength &&
-              token.owner.tokens.length > minimumNftListLength && (
-                <button
-                  onClick={() => {
-                    setNftListLength(minimumNftListLength);
-                  }}
-                >
-                  ...
-                </button>
-              )}
+      <div style={{ position: "fixed", width: "150%" }}>
+        <p>Number of Bored ape to list</p>
+        <input
+          type="number"
+          min={0}
+          style={{ width: "400px" }}
+          placeholder="Enter number of listed Apes..."
+          onChange={(event) => setNumberOfTokens(event.target.value)}
+        />
+        <p>ENS tracker</p>
+        <input
+          style={{ width: "400px" }}
+          placeholder="Enter address..."
+          onChange={(event) => setEthAddress(event.target.value)}
+        />
+        <p>ENS: {ensName}</p>
+        <p>Image tracker</p>
+        <input
+          type="number"
+          min={0}
+          style={{ width: "400px" }}
+          placeholder="Enter NFT ID..."
+          onChange={(event) =>
+            event.target.value !== "" && setNftID(event.target.value)
+          }
+        />
+        <p>NFT image link:</p>{" "}
+        <a href={nftImage} target="_blank" rel="noreferrer">
+          {nftImage}
+        </a>
+      </div>
+      <div style={{ float: "left", width: "50%" }}>
+        {tokens.map((token: any, index) => (
+          <div key={index}>
+            <b>Holder address:</b> {token.owner.id}
+            {console.log("token", token)}
+            <div style={{ flex: "right" }}>
+              <p>Number of Bored Apes: {token.owner.tokens.length}</p>
+              {token.owner.tokens.map((nfts, indexSecond: number) => (
+                <div key={nfts.id}>
+                  <>
+                    {() => setNftListLength(minimumNftListLength)}
+                    {indexSecond <= nftListLength - 1 && <p>NFT# {nfts.id}</p>}
+                  </>
+                </div>
+              ))}
+              {token.owner.tokens.length > nftListLength - 1 &&
+                nftListLength <= minimumNftListLength && (
+                  <button
+                    onClick={() => {
+                      setNftListLength(parseInt(token.owner.tokens.length));
+                    }}
+                  >
+                    ...
+                  </button>
+                )}
+              {nftListLength > minimumNftListLength &&
+                token.owner.tokens.length > minimumNftListLength && (
+                  <button
+                    onClick={() => {
+                      setNftListLength(minimumNftListLength);
+                    }}
+                  >
+                    ...
+                  </button>
+                )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
