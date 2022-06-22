@@ -1,49 +1,16 @@
 import "./App.css";
 import { useEffect, useMemo, useState } from "react";
-import { gql } from "graphql-request";
 import { request } from "graphql-request";
-
-const APIURL =
-  "https://api.thegraph.com/subgraphs/name/hashrei/bored-ape-yacht-club-top-holders-second";
-
-const HTTP_GRAPHQL_ENDPOINT =
-  "https://api.thegraph.com/subgraphs/name/ensdomains/ens";
-
-function boredApeQuery(numberOfTokens: number) {
-  return gql`
-    {
-      tokens(first: ${numberOfTokens}) {
-      owner{
-        id
-        tokens {
-          id
-        }
-      }
-    }
-  }`;
-}
-
-function imageQuery(nftID: string) {
-  return gql`
-    {
-      tokens(where: {tokenID: "${nftID}"}) {
-      image
-    }
-  }`;
-}
-
-function getQueryENSFromETHAddress(ethAddress: string) {
-  return gql`
-    {
-      domains(first: 1, where:{owner:"${ethAddress}"}) {
-      id
-      name
-      owner{
-        id
-      }
-    }
-  }`;
-}
+import {
+  HTTP_GRAPHQL_ENDPOINT_BORED_APE,
+  HTTP_GRAPHQL_ENDPOINT_ENS,
+} from "./const.js";
+import {
+  boredApeQuery,
+  imageQuery,
+  getQueryENSFromETHAddress,
+  boredApeQueryForEthAddress,
+} from "./queries";
 
 function App() {
   const minimumNftListLength = 5;
@@ -55,27 +22,43 @@ function App() {
   const [nftImage, setNftImage] = useState("");
   const [numberOfTokens, setNumberOfTokens] = useState("30");
   const [nftListLength, setNftListLength] = useState(minimumNftListLength);
+  const [ethAddressTracker, setEthAddressTracker] = useState("");
+  const [individualTokens, setIndividualTokens] = useState([]);
+  const [nftListLengthIndividual, setNftListLengthIndividual] =
+    useState(minimumNftListLength);
 
   useEffect(() => {
-    fetchData();
-  }, [ethAddress, numberOfTokens]);
+    fetchData(ethAddress, numberOfTokens, ethAddressTracker);
+  }, [ethAddress, numberOfTokens, ethAddressTracker]);
 
   useMemo(() => {
-    fetchNftImageData();
+    fetchNftImageData(nftID);
   }, [nftID]);
 
-  async function fetchData() {
+  async function fetchData(
+    ethAddress: string,
+    numberOfTokens: string,
+    ethAddressTracker: string
+  ) {
     if (numberOfTokens !== "0") {
       const nftListResult = await request(
-        APIURL,
+        HTTP_GRAPHQL_ENDPOINT_BORED_APE,
         boredApeQuery(parseInt(numberOfTokens))
       );
       setTokens(nftListResult.tokens);
     } else setTokens([]);
 
+    if (ethAddressTracker.length === 42) {
+      const ethAdrressListResult = await request(
+        HTTP_GRAPHQL_ENDPOINT_BORED_APE,
+        boredApeQueryForEthAddress(ethAddressTracker)
+      );
+      setIndividualTokens(ethAdrressListResult.users[0].tokens);
+    } else setIndividualTokens([]);
+
     if (ethAddress.length === 42) {
       const ethAdrressResult = await request(
-        HTTP_GRAPHQL_ENDPOINT,
+        HTTP_GRAPHQL_ENDPOINT_ENS,
         getQueryENSFromETHAddress(ethAddress)
       );
       if (ethAdrressResult.domains[0] === undefined)
@@ -84,8 +67,11 @@ function App() {
     } else setEnsName("Not an ETH address");
   }
 
-  async function fetchNftImageData() {
-    const imageResult = await request(APIURL, imageQuery(nftID));
+  async function fetchNftImageData(nftID: string) {
+    const imageResult = await request(
+      HTTP_GRAPHQL_ENDPOINT_BORED_APE,
+      imageQuery(nftID)
+    );
     setNftImage(imageResult.tokens[0].image);
   }
 
@@ -121,12 +107,46 @@ function App() {
         <a href={nftImage} target="_blank" rel="noreferrer">
           {nftImage}
         </a>
+        <p>ETH address tracker</p>
+        <input
+          style={{ width: "400px" }}
+          placeholder="Enter ETH address..."
+          onChange={(event) => setEthAddressTracker(event.target.value)}
+        />
+        <p>Number of Bored Apes: {individualTokens.length}</p>
+        <div>
+          {individualTokens.map((token: any, index) => (
+            <div key={index}>
+              {index <= nftListLengthIndividual - 1 && <p>NFT# {token.id}</p>}
+            </div>
+          ))}
+          {individualTokens.length > nftListLengthIndividual - 1 &&
+            nftListLengthIndividual <= minimumNftListLength && (
+              <button
+                onClick={() => {
+                  setNftListLengthIndividual(individualTokens.length);
+                }}
+              >
+                ...
+              </button>
+            )}
+          {nftListLengthIndividual > minimumNftListLength &&
+            individualTokens.length > minimumNftListLength && (
+              <button
+                onClick={() => {
+                  setNftListLengthIndividual(minimumNftListLength);
+                }}
+              >
+                ...
+              </button>
+            )}
+        </div>
       </div>
-      <div style={{ float: "left", width: "50%" }}>
+
+      <div style={{ position: "absolute", width: "50%" }}>
         {tokens.map((token: any, index) => (
           <div key={index}>
             <b>Holder address:</b> {token.owner.id}
-            {console.log("token", token)}
             <div style={{ flex: "right" }}>
               <p>Number of Bored Apes: {token.owner.tokens.length}</p>
               {token.owner.tokens.map((nfts, indexSecond: number) => (
