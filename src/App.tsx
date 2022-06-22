@@ -92,7 +92,7 @@ function App() {
     <div className="App">
       <div style={{ position: "fixed", width: "150%" }}>
         <button onClick={() => clear()}>CLEAR</button>
-        <p>Number of Bored ape to list</p>
+        <p>Number of Bored Apes to list</p>
         <input
           type="number"
           min={0}
