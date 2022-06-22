@@ -3,7 +3,7 @@ import { gql } from "graphql-request";
 export function boredApeQuery(numberOfTokens) {
   return gql`
       {
-        tokens(first: ${numberOfTokens}) {
+        tokens(first: ${numberOfTokens}, orderBy: tokenID) {
         owner{
           id
           tokens {
