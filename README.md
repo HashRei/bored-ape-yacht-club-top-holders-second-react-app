@@ -2,6 +2,13 @@ Made by <a href="https://github.com/HashRei">@HashRei</a>
 
 # Getting Started
 
+## Description
+
+Web application that returns Bored Ape Yacht Club NFT holders and the number of Bored Apes they hold🐱‍🏍
+
+Explanation video => 
+<a href="https://www.youtube.com/watch?v=0mvjyO3KZxk&t=26s" target="_blank"> Bored Ape Yacht Club Subgraph | HashRei</a>  📽
+
 ## Requirements
 
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
