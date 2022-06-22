@@ -15,8 +15,6 @@ Made by <a href="https://github.com/HashRei">@HashRei</a>
   - You'll know you've installed yarn right if you can run:
     - `yarn --version` And get an output like: `x.x.x`
     - You might need to install it with npm
- - [The Graph](https://thegraph.com/hosted-service/)
-    - Sign in with your GitHub account
 
 
 ### Build with...
