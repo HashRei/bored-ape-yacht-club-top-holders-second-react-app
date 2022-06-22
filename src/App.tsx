@@ -18,7 +18,7 @@ function App() {
   const [tokens, setTokens] = useState([]);
   const [ensName, setEnsName] = useState("");
   const [ethAddress, setEthAddress] = useState("");
-  const [nftID, setNftID] = useState("0"); // There shouldn't be a nftID 0 in the collection
+  const [nftID, setNftID] = useState("");
   const [nftImage, setNftImage] = useState("");
   const [numberOfTokens, setNumberOfTokens] = useState("30");
   const [nftListLength, setNftListLength] = useState(minimumNftListLength);
@@ -26,6 +26,7 @@ function App() {
   const [individualTokens, setIndividualTokens] = useState([]);
   const [nftListLengthIndividual, setNftListLengthIndividual] =
     useState(minimumNftListLength);
+  const [showNftsFromIndividual, setShowNftsFromIndividual] = useState(false);
 
   useEffect(() => {
     fetchData(ethAddress, numberOfTokens, ethAddressTracker);
@@ -54,7 +55,10 @@ function App() {
         boredApeQueryForEthAddress(ethAddressTracker)
       );
       setIndividualTokens(ethAdrressListResult.users[0].tokens);
-    } else setIndividualTokens([]);
+    } else {
+      setIndividualTokens([]);
+      setShowNftsFromIndividual(false);
+    }
 
     if (ethAddress.length === 42) {
       const ethAdrressResult = await request(
@@ -75,9 +79,19 @@ function App() {
     setNftImage(imageResult.tokens[0].image);
   }
 
+  function clear() {
+    setNumberOfTokens("0");
+    setEnsName("");
+    setEthAddress("");
+    setNftImage("No image link for now");
+    setNftID("");
+    setEthAddressTracker("");
+  }
+
   return (
     <div className="App">
       <div style={{ position: "fixed", width: "150%" }}>
+        <button onClick={() => clear()}>CLEAR</button>
         <p>Number of Bored ape to list</p>
         <input
           type="number"
@@ -124,7 +138,7 @@ function App() {
             nftListLengthIndividual <= minimumNftListLength && (
               <button
                 onClick={() => {
-                  setNftListLengthIndividual(individualTokens.length);
+                  setShowNftsFromIndividual(true);
                 }}
               >
                 ...
@@ -144,42 +158,56 @@ function App() {
       </div>
 
       <div style={{ position: "absolute", width: "50%" }}>
-        {tokens.map((token: any, index) => (
-          <div key={index}>
-            <b>Holder address:</b> {token.owner.id}
-            <div style={{ flex: "right" }}>
-              <p>Number of Bored Apes: {token.owner.tokens.length}</p>
-              {token.owner.tokens.map((nfts, indexSecond: number) => (
-                <div key={nfts.id}>
-                  <>
-                    {() => setNftListLength(minimumNftListLength)}
-                    {indexSecond <= nftListLength - 1 && <p>NFT# {nfts.id}</p>}
-                  </>
-                </div>
-              ))}
-              {token.owner.tokens.length > nftListLength - 1 &&
-                nftListLength <= minimumNftListLength && (
-                  <button
-                    onClick={() => {
-                      setNftListLength(parseInt(token.owner.tokens.length));
-                    }}
-                  >
-                    ...
-                  </button>
-                )}
-              {nftListLength > minimumNftListLength &&
-                token.owner.tokens.length > minimumNftListLength && (
-                  <button
-                    onClick={() => {
-                      setNftListLength(minimumNftListLength);
-                    }}
-                  >
-                    ...
-                  </button>
-                )}
-            </div>
+        {showNftsFromIndividual ? (
+          <div>
+            <p>Address: {ethAddressTracker}</p>
+            <p>Number of Bored Apes: {individualTokens.length}</p>
+            {individualTokens.map((token: any, index) => (
+              <div key={index}>{<p>NFT# {token.id}</p>}</div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <>
+            {tokens.map((token: any, index) => (
+              <div key={index}>
+                <b>Holder address:</b> {token.owner.id}
+                <div style={{ flex: "right" }}>
+                  <p>Number of Bored Apes: {token.owner.tokens.length}</p>
+                  {token.owner.tokens.map((nfts, indexSecond: number) => (
+                    <div key={nfts.id}>
+                      <>
+                        {() => setNftListLength(minimumNftListLength)}
+                        {indexSecond <= nftListLength - 1 && (
+                          <p>NFT# {nfts.id}</p>
+                        )}
+                      </>
+                    </div>
+                  ))}
+                  {token.owner.tokens.length > nftListLength - 1 &&
+                    nftListLength <= minimumNftListLength && (
+                      <button
+                        onClick={() => {
+                          setNftListLength(parseInt(token.owner.tokens.length));
+                        }}
+                      >
+                        ...
+                      </button>
+                    )}
+                  {nftListLength > minimumNftListLength &&
+                    token.owner.tokens.length > minimumNftListLength && (
+                      <button
+                        onClick={() => {
+                          setNftListLength(minimumNftListLength);
+                        }}
+                      >
+                        ...
+                      </button>
+                    )}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
